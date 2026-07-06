@@ -23,10 +23,13 @@ describe('TaskList', () => {
     },
   ];
 
-  const setup = (getTasks: Mock) => {
+  const setup = (
+    getTasks: Mock,
+    updateStatus: Mock = vi.fn().mockReturnValue(of(tasks[0])),
+  ) => {
     TestBed.configureTestingModule({
       imports: [TaskList],
-      providers: [{ provide: TaskService, useValue: { getTasks } }],
+      providers: [{ provide: TaskService, useValue: { getTasks, updateStatus } }],
     });
     const fixture = TestBed.createComponent(TaskList);
     fixture.detectChanges(); // triggers ngOnInit + render
@@ -76,5 +79,20 @@ describe('TaskList', () => {
     fixture.detectChanges();
 
     expect(getTasks).toHaveBeenLastCalledWith('done');
+  });
+
+  // TODO (candidate): make this pass by implementing changeStatus.
+  describe('changeStatus', () => {
+    it('updates the status via the service and reloads the list', () => {
+      const getTasks = vi.fn().mockReturnValue(of(tasks));
+      const updateStatus = vi.fn().mockReturnValue(of(tasks[0]));
+      const fixture = setup(getTasks, updateStatus);
+
+      fixture.componentInstance.changeStatus(tasks[0], TaskStatus.Pending);
+
+      expect(updateStatus).toHaveBeenCalledWith(1, TaskStatus.Pending);
+      // initial load on init + reload after the update
+      expect(getTasks).toHaveBeenCalledTimes(2);
+    });
   });
 });

@@ -47,4 +47,13 @@ describe('TaskService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
+
+  it('PUTs the new status to /api/tasks/:id/status', () => {
+    service.updateStatus(1, TaskStatus.Done).subscribe();
+
+    const req = httpMock.expectOne('/api/tasks/1/status');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ status: TaskStatus.Done });
+    req.flush({ ...task, status: TaskStatus.Done });
+  });
 });

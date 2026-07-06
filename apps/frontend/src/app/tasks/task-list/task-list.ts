@@ -17,12 +17,8 @@ export class TaskList implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly statusFilter = signal<StatusFilter>('all');
 
-  protected readonly filters: StatusFilter[] = [
-    'all',
-    TaskStatus.Pending,
-    TaskStatus.InProgress,
-    TaskStatus.Done,
-  ];
+  protected readonly statuses: TaskStatus[] = Object.values(TaskStatus);
+  protected readonly filters: StatusFilter[] = ['all', ...this.statuses];
 
   ngOnInit(): void {
     this.load();
@@ -31,6 +27,12 @@ export class TaskList implements OnInit {
   protected onFilterChange(value: string): void {
     this.statusFilter.set(value as StatusFilter);
     this.load();
+  }
+
+  // TODO: implement — change the task's status via the API, then refresh the list.
+  changeStatus(task: TaskDto, status: TaskStatus): void {
+    void task;
+    void status;
   }
 
   private load(): void {

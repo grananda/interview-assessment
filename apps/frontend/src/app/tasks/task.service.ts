@@ -15,4 +15,8 @@ export class TaskService {
       : {};
     return this.http.get<TaskDto[]>(this.baseUrl, options);
   }
+
+  updateStatus(id: number, status: TaskStatus): Observable<TaskDto> {
+    return this.http.put<TaskDto>(`${this.baseUrl}/${id}/status`, { status });
+  }
 }
