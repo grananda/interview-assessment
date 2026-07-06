@@ -6,7 +6,7 @@ import {
   TaskRepository,
 } from '../repositories/interfaces/task.repository';
 import { TaskStatus } from '../enums/task-status.enum';
-import type { Task } from '../entities/task.entity';
+import { Task } from '../entities/task.entity';
 import { TaskSchema } from '../schemas/task.schema';
 import { TaskNotFoundError } from '../errors/task-not-found.error';
 
@@ -23,15 +23,19 @@ describe('TasksService', () => {
     status: 'in_progress',
     created_at: '2026-02-01T12:30:00.000Z',
   };
-  // Expected domain shape, spelled out explicitly so the mapping (snake_case ->
-  // camelCase, string -> enum) is verified independently of Task.fromSchema.
-  const expectedTask: Task = {
-    id: 1,
-    title: 'Wire the tasks endpoint',
-    description: 'Return the task list from the service',
-    status: TaskStatus.InProgress,
-    createdAt: '2026-02-01T12:30:00.000Z',
+  // Expected domain shape as a real Task instance, spelled out explicitly: the
+  // values are hand-written (so the mapping is verified independently of
+  // Task.fromSchema) while the prototype lets toStrictEqual assert the instance.
+  const buildExpectedTask = (): Task => {
+    const task = new Task();
+    task.id = 1;
+    task.title = 'Wire the tasks endpoint';
+    task.description = 'Return the task list from the service';
+    task.status = TaskStatus.InProgress;
+    task.createdAt = '2026-02-01T12:30:00.000Z';
+    return task;
   };
+  const expectedTask = buildExpectedTask();
 
   beforeEach(async () => {
     repository = { findAll: jest.fn(), findById: jest.fn() };
@@ -56,9 +60,19 @@ describe('TasksService', () => {
 
     expect(cache.get).toHaveBeenCalledWith('tasks:all');
     expect(repository.findAll).toHaveBeenCalledWith(undefined);
-    expect(result).toEqual([expectedTask]);
+    expect(result).toStrictEqual([expectedTask]);
     // Key, mapped value and TTL (30s) must all be persisted back.
     expect(cache.set).toHaveBeenCalledWith('tasks:all', [expectedTask], 30_000);
+  });
+
+  it('returns a fresh array so the cached state cannot be mutated by callers', async () => {
+    const cachedTasks = [buildExpectedTask()];
+    cache.get.mockResolvedValue(cachedTasks);
+
+    const result = await service.findAll();
+
+    expect(result).not.toBe(cachedTasks); // different array reference
+    expect(result).toStrictEqual(cachedTasks);
   });
 
   it('serves from cache without hitting the repository on a cache hit', async () => {
@@ -66,7 +80,7 @@ describe('TasksService', () => {
 
     const result = await service.findAll();
 
-    expect(result).toEqual([expectedTask]);
+    expect(result).toStrictEqual([expectedTask]);
     expect(repository.findAll).not.toHaveBeenCalled();
     expect(cache.set).not.toHaveBeenCalled();
   });
@@ -81,20 +95,34 @@ describe('TasksService', () => {
     expect(repository.findAll).toHaveBeenCalledWith(TaskStatus.Done);
   });
 
-  it('returns the mapped task when it exists', async () => {
+  it('returns the mapped task and caches it by id when it exists', async () => {
+    cache.get.mockResolvedValue(undefined);
     repository.findById.mockResolvedValue(row);
 
     const result = await service.findById(1);
 
+    expect(cache.get).toHaveBeenCalledWith('task:1');
     expect(repository.findById).toHaveBeenCalledWith(1);
-    expect(result).toEqual(expectedTask);
+    expect(result).toStrictEqual(expectedTask);
+    expect(cache.set).toHaveBeenCalledWith('task:1', expectedTask, 30_000);
+  });
+
+  it('serves a single task from cache without hitting the repository', async () => {
+    cache.get.mockResolvedValue(expectedTask);
+
+    const result = await service.findById(1);
+
+    expect(result).toStrictEqual(expectedTask);
+    expect(repository.findById).not.toHaveBeenCalled();
   });
 
   it('raises a domain error when the task does not exist', async () => {
+    cache.get.mockResolvedValue(undefined);
     repository.findById.mockResolvedValue(null);
 
     await expect(service.findById(99)).rejects.toBeInstanceOf(
       TaskNotFoundError,
     );
+    expect(cache.set).not.toHaveBeenCalled();
   });
 });

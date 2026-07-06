@@ -25,7 +25,7 @@ export class TaskResponseDto {
   }
 
   /** Maps a list of domain Tasks to their API representations. */
-  static map(tasks: Task[]): TaskResponseDto[] {
+  static map(tasks: readonly Task[]): TaskResponseDto[] {
     return tasks.map((task) => TaskResponseDto.fromEntity(task));
   }
 }

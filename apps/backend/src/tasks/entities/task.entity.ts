@@ -16,8 +16,20 @@ export class Task {
     task.id = row.id;
     task.title = row.title;
     task.description = row.description;
-    task.status = row.status as TaskStatus;
+    task.status = Task.toStatus(row.status);
     task.createdAt = row.created_at;
     return task;
+  }
+
+  /**
+   * Validates the raw status string against the domain enum instead of blindly
+   * casting it, so a corrupt/unknown value in the store fails fast and loud.
+   */
+  private static toStatus(value: string): TaskStatus {
+    const statuses = Object.values(TaskStatus) as string[];
+    if (!statuses.includes(value)) {
+      throw new Error(`Invalid task status from store: "${value}"`);
+    }
+    return value as TaskStatus;
   }
 }
