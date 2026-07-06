@@ -1,5 +1,5 @@
 import type { TaskSchema } from '../schemas/task.schema';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 
 /** Domain representation of a task, as used across the application. */
 export class Task {

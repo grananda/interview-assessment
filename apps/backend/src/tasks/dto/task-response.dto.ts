@@ -1,11 +1,12 @@
 import { Task } from '../entities/task.entity';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskDto, TaskStatus } from '@repo/shared';
 
 /**
- * Output DTO: the shape returned to API clients. Decouples the database row
- * from the public API contract so storage changes don't leak to consumers.
+ * Output DTO: the shape returned to API clients. Implements the shared TaskDto
+ * contract so the API response is guaranteed to match what the frontend expects,
+ * while decoupling the wire shape from the database row.
  */
-export class TaskResponseDto {
+export class TaskResponseDto implements TaskDto {
   id!: number;
   title!: string;
   description!: string;

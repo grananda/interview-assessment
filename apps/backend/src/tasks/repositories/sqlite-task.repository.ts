@@ -5,7 +5,7 @@ import {
 } from '../database/task-database';
 import { TaskRepository } from './interfaces/task.repository';
 import { TaskSchema } from '../schemas/task.schema';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 
 /** SQLite-backed implementation of TaskRepository. Only reads raw rows. */
 @Injectable()

@@ -1,6 +1,6 @@
 import { TaskResponseDto } from './task-response.dto';
 import { Task } from '../entities/task.entity';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 
 describe('TaskResponseDto', () => {
   const buildTask = (): Task => {

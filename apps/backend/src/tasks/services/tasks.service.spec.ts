@@ -5,7 +5,7 @@ import {
   TASK_REPOSITORY,
   TaskRepository,
 } from '../repositories/interfaces/task.repository';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 import { Task } from '../entities/task.entity';
 import { TaskSchema } from '../schemas/task.schema';
 import { TaskNotFoundError } from '../errors/task-not-found.error';

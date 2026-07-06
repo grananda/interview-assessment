@@ -1,5 +1,5 @@
 import { TaskSchema } from '../../schemas/task.schema';
-import { TaskStatus } from '../../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 
 /** Injection token for the task repository abstraction. */
 export const TASK_REPOSITORY = Symbol('TASK_REPOSITORY');

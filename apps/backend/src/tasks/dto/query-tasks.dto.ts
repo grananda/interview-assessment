@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional } from 'class-validator';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 
 /** Input DTO: query parameters accepted by GET /api/tasks. */
 export class QueryTasksDto {

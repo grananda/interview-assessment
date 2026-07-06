@@ -2,7 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { TasksController } from './tasks.controller';
 import { TasksService } from '../services/tasks.service';
 import { Task } from '../entities/task.entity';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 import { TaskNotFoundError } from '../errors/task-not-found.error';
 
 describe('TasksController', () => {

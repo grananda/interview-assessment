@@ -6,7 +6,7 @@ import {
   type TaskRepository,
 } from '../repositories/interfaces/task.repository';
 import { Task } from '../entities/task.entity';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 import { TaskNotFoundError } from '../errors/task-not-found.error';
 
 @Injectable()

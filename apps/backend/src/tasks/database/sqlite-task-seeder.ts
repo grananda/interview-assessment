@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { SQLITE_CONNECTION, type SqliteConnection } from './task-database';
 import { TaskSeeder } from './interfaces/task-seeder';
-import { TaskStatus } from '../enums/task-status.enum';
+import { TaskStatus } from '@repo/shared';
 
 /** SQLite implementation of TaskSeeder: inserts demo tasks if none exist. */
 @Injectable()
