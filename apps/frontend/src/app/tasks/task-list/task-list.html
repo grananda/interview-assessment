@@ -1,0 +1,36 @@
+<section class="tasks">
+  <header class="tasks__header">
+    <h1>Tasks</h1>
+    <label class="tasks__filter">
+      Status
+      <select #select (change)="onFilterChange(select.value)">
+        @for (filter of filters; track filter) {
+          <option [value]="filter">{{ filter }}</option>
+        }
+      </select>
+    </label>
+  </header>
+
+  @if (loading()) {
+    <p class="tasks__state">Loading…</p>
+  } @else if (error()) {
+    <p class="tasks__state tasks__state--error">{{ error() }}</p>
+  } @else if (tasks().length === 0) {
+    <p class="tasks__state">No tasks found.</p>
+  } @else {
+    <ul class="tasks__list">
+      @for (task of tasks(); track task.id) {
+        <li class="task">
+          <div class="task__row">
+            <span class="task__title">{{ task.title }}</span>
+            <span class="task__status task__status--{{ task.status }}">
+              {{ task.status }}
+            </span>
+          </div>
+          <p class="task__desc">{{ task.description }}</p>
+          <time class="task__date">{{ task.createdAt }}</time>
+        </li>
+      }
+    </ul>
+  }
+</section>

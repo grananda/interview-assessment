@@ -1,0 +1,89 @@
+.tasks {
+  max-width: 640px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, sans-serif;
+}
+
+.tasks__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tasks__filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.tasks__state {
+  color: #666;
+
+  &--error {
+    color: #c0392b;
+  }
+}
+
+.tasks__list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.task {
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.task__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.task__title {
+  font-weight: 600;
+}
+
+.task__status {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #eee;
+  color: #444;
+
+  &--pending {
+    background: #fdf0d5;
+    color: #8a6d3b;
+  }
+
+  &--in_progress {
+    background: #d6e4ff;
+    color: #1c4e80;
+  }
+
+  &--done {
+    background: #d7f5dd;
+    color: #256a34;
+  }
+}
+
+.task__desc {
+  margin: 0.4rem 0 0.2rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.task__date {
+  color: #999;
+  font-size: 0.8rem;
+}
