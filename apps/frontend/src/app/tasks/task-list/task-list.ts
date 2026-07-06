@@ -29,10 +29,16 @@ export class TaskList implements OnInit {
     this.load();
   }
 
-  // TODO: implement — change the task's status via the API, then refresh the list.
+  /** Persists a task's new status, then refreshes the list on success. */
   changeStatus(task: TaskDto, status: TaskStatus): void {
-    void task;
-    void status;
+    if (status === task.status) {
+      return;
+    }
+
+    this.taskService.updateStatus(task.id, status).subscribe({
+      next: () => this.load(),
+      error: () => this.error.set('Failed to update the task.'),
+    });
   }
 
   private load(): void {

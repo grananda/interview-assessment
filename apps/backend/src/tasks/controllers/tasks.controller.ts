@@ -1,13 +1,16 @@
 import {
+  Body,
   Controller,
   Get,
   NotFoundException,
   Param,
   ParseIntPipe,
+  Put,
   Query,
 } from '@nestjs/common';
 import { TasksService } from '../services/tasks.service';
 import { QueryTasksDto } from '../dto/query-tasks.dto';
+import { UpdateTaskStatusDto } from '../dto/update-task-status.dto';
 import { TaskResponseDto } from '../dto/task-response.dto';
 import { TaskNotFoundError } from '../errors/task-not-found.error';
 
@@ -38,8 +41,20 @@ export class TasksController {
     }
   }
 
-  // TODO: implement PUT /api/tasks/:id/status
-  updateStatus(): Promise<TaskResponseDto> {
-    return Promise.reject(new Error('Not implemented yet'));
+  /** PUT /api/tasks/:id/status — updates a task's status or 404 when not found. */
+  @Put(':id/status')
+  async updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateTaskStatusDto,
+  ): Promise<TaskResponseDto> {
+    try {
+      const task = await this.tasksService.updateStatus(id, body.status);
+      return TaskResponseDto.fromEntity(task);
+    } catch (error) {
+      if (error instanceof TaskNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 }
