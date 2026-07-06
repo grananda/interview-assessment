@@ -13,7 +13,7 @@ import { TaskNotFoundError } from '../errors/task-not-found.error';
 describe('TasksService', () => {
   let service: TasksService;
   let repository: jest.Mocked<TaskRepository>;
-  let cache: { get: jest.Mock; set: jest.Mock };
+  let cache: { get: jest.Mock; set: jest.Mock; del: jest.Mock };
 
   // Raw persistence row as returned by the repository (snake_case, plain status).
   const row: TaskSchema = {
@@ -38,8 +38,12 @@ describe('TasksService', () => {
   const expectedTask = buildExpectedTask();
 
   beforeEach(async () => {
-    repository = { findAll: jest.fn(), findById: jest.fn() };
-    cache = { get: jest.fn(), set: jest.fn() };
+    repository = {
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      updateStatus: jest.fn(),
+    };
+    cache = { get: jest.fn(), set: jest.fn(), del: jest.fn() };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -123,6 +127,32 @@ describe('TasksService', () => {
     await expect(service.findById(99)).rejects.toBeInstanceOf(
       TaskNotFoundError,
     );
+    expect(cache.set).not.toHaveBeenCalled();
+  });
+
+  it('updates the status, invalidates list caches and refreshes the task', async () => {
+    repository.updateStatus.mockResolvedValue(row);
+
+    const result = await service.updateStatus(1, TaskStatus.Done);
+
+    expect(repository.updateStatus).toHaveBeenCalledWith(1, TaskStatus.Done);
+    expect(result).toStrictEqual(expectedTask);
+    // Every cached list is dropped (unfiltered + one per status)...
+    expect(cache.del).toHaveBeenCalledWith('tasks:all');
+    expect(cache.del).toHaveBeenCalledWith('tasks:done');
+    expect(cache.del).toHaveBeenCalledWith('tasks:pending');
+    expect(cache.del).toHaveBeenCalledWith('tasks:in_progress');
+    // ...and the single-task entry is refreshed with the new value.
+    expect(cache.set).toHaveBeenCalledWith('task:1', expectedTask, 30_000);
+  });
+
+  it('raises a domain error and touches no cache when updating a missing task', async () => {
+    repository.updateStatus.mockResolvedValue(null);
+
+    await expect(service.updateStatus(99, TaskStatus.Done)).rejects.toBeInstanceOf(
+      TaskNotFoundError,
+    );
+    expect(cache.del).not.toHaveBeenCalled();
     expect(cache.set).not.toHaveBeenCalled();
   });
 });

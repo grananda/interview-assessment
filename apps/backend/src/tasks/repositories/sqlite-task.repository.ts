@@ -7,7 +7,6 @@ import { TaskRepository } from './interfaces/task.repository';
 import { TaskSchema } from '../schemas/task.schema';
 import { TaskStatus } from '@repo/shared';
 
-/** SQLite-backed implementation of TaskRepository. Only reads raw rows. */
 @Injectable()
 export class SqliteTaskRepository implements TaskRepository {
   constructor(
@@ -27,5 +26,18 @@ export class SqliteTaskRepository implements TaskRepository {
     const row = this.db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as
       TaskSchema | undefined;
     return row ?? null;
+  }
+
+  async updateStatus(
+    id: number,
+    status: TaskStatus,
+  ): Promise<TaskSchema | null> {
+    const result = this.db
+      .prepare('UPDATE tasks SET status = ? WHERE id = ?')
+      .run(status, id);
+    if (result.changes === 0) {
+      return null;
+    }
+    return this.findById(id);
   }
 }

@@ -31,11 +31,15 @@ export class TasksController {
       const task = await this.tasksService.findById(id);
       return TaskResponseDto.fromEntity(task);
     } catch (error) {
-      // Translate the transport-agnostic domain error into an HTTP response.
       if (error instanceof TaskNotFoundError) {
         throw new NotFoundException(error.message);
       }
       throw error;
     }
+  }
+
+  // TODO: implement PUT /api/tasks/:id/status
+  updateStatus(): Promise<TaskResponseDto> {
+    return Promise.reject(new Error('Not implemented yet'));
   }
 }

@@ -7,10 +7,8 @@ export class Task {
   title!: string;
   description!: string;
   status!: TaskStatus;
-  /** Creation timestamp stored as an ISO 8601 string. */
   createdAt!: string;
 
-  /** Builds a domain Task from a raw persistence row (snake_case -> camelCase). */
   static fromSchema(row: TaskSchema): Task {
     const task = new Task();
     task.id = row.id;
@@ -21,10 +19,6 @@ export class Task {
     return task;
   }
 
-  /**
-   * Validates the raw status string against the domain enum instead of blindly
-   * casting it, so a corrupt/unknown value in the store fails fast and loud.
-   */
   private static toStatus(value: string): TaskStatus {
     const statuses = Object.values(TaskStatus) as string[];
     if (!statuses.includes(value)) {

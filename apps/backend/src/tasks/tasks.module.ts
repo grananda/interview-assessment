@@ -17,20 +17,16 @@ import { TASK_REPOSITORY } from './repositories/interfaces/task.repository';
 import { SqliteTaskRepository } from './repositories/sqlite-task.repository';
 
 @Module({
-  // In-memory cache store (default) for the tasks feature.
   imports: [CacheModule.register()],
   controllers: [TasksController],
   providers: [
-    // Shared SQLite connection, created once and injected everywhere.
     sqliteConnectionProvider,
-    // Schema and seeder abstractions bound to their SQLite implementations.
     {
       provide: TASK_SCHEMA_INITIALIZER,
       useClass: SqliteTaskSchemaInitializer,
     },
     { provide: TASK_SEEDER, useClass: SqliteTaskSeeder },
     TasksService,
-    // Bind the repository abstraction (token) to its SQLite implementation.
     { provide: TASK_REPOSITORY, useClass: SqliteTaskRepository },
   ],
 })
@@ -41,7 +37,6 @@ export class TasksModule implements OnModuleInit {
     @Inject(TASK_SEEDER) private readonly seeder: TaskSeeder,
   ) {}
 
-  /** Bootstrap order matters: the table must exist before seeding it. */
   onModuleInit(): void {
     this.schemaInitializer.createSchema();
     this.seeder.seed();

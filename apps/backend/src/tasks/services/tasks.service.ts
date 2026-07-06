@@ -19,11 +19,7 @@ export class TasksService {
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
 
-  /**
-   * Returns the domain task list (optionally filtered by status), served from
-   * the in-memory cache on a hit and persisted back on a miss. The result is a
-   * fresh array so callers cannot mutate the cached state (readonly signals it).
-   */
+  /** Returns the task list, optionally filtered by status. */
   async findAll(status?: TaskStatus): Promise<readonly Task[]> {
     const cacheKey = `tasks:${status ?? 'all'}`;
 
@@ -39,10 +35,7 @@ export class TasksService {
     return [...tasks];
   }
 
-  /**
-   * Returns a single task (cached by id) or raises a domain error when it does
-   * not exist. Only existing tasks are cached; misses are not memoized.
-   */
+  /** Returns a single task or raises a domain error when it does not exist. */
   async findById(id: number): Promise<Task> {
     const cacheKey = `task:${id}`;
 
@@ -59,5 +52,27 @@ export class TasksService {
     const task = Task.fromSchema(row);
     await this.cache.set(cacheKey, task, this.cacheTtlMs);
     return task;
+  }
+
+  /** Updates a task's status or raises a domain error when it does not exist. */
+  async updateStatus(id: number, status: TaskStatus): Promise<Task> {
+    const row = await this.taskRepository.updateStatus(id, status);
+    if (!row) {
+      throw new TaskNotFoundError(id);
+    }
+
+    const task = Task.fromSchema(row);
+    await this.invalidateListCaches();
+    await this.cache.set(`task:${id}`, task, this.cacheTtlMs);
+    return task;
+  }
+
+  private async invalidateListCaches(): Promise<void> {
+    await this.cache.del('tasks:all');
+    await Promise.all(
+      Object.values(TaskStatus).map((status) =>
+        this.cache.del(`tasks:${status}`),
+      ),
+    );
   }
 }
