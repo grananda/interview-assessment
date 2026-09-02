@@ -98,7 +98,41 @@ describe("TaskList", () => {
         1,
         TaskStatus.Pending,
       );
-      expect(taskService.getTasks).toHaveBeenCalledTimes(2);
+      await waitFor(() =>
+        expect(taskService.getTasks).toHaveBeenCalledTimes(2),
+      );
+    });
+
+    it("does not update when the selected status has not changed", async () => {
+      render(<TaskList />);
+      const taskItem = (await screen.findByText(tasks[0].title)).closest("li")!;
+
+      fireEvent.change(
+        within(taskItem).getByRole("combobox", {
+          name: `Change status for ${tasks[0].title}`,
+        }),
+        { target: { value: TaskStatus.Done } },
+      );
+
+      expect(taskService.updateStatus).not.toHaveBeenCalled();
+    });
+
+    it("shows an error when updating the status fails", async () => {
+      vi.mocked(taskService.updateStatus).mockRejectedValue(new Error("boom"));
+      render(<TaskList />);
+      const taskItem = (await screen.findByText(tasks[0].title)).closest("li")!;
+
+      fireEvent.change(
+        within(taskItem).getByRole("combobox", {
+          name: `Change status for ${tasks[0].title}`,
+        }),
+        { target: { value: TaskStatus.Pending } },
+      );
+
+      expect(
+        await screen.findByText("Failed to update the task."),
+      ).toBeInTheDocument();
+      expect(taskService.getTasks).toHaveBeenCalledTimes(1);
     });
   });
 });

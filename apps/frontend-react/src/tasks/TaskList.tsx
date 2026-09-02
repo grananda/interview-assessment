@@ -33,10 +33,16 @@ export function TaskList() {
     void load();
   }, [load]);
 
-  // TODO: implement — change the task's status via the API, then refresh the list.
+  /** Persists a task's new status, then refreshes the list on success. */
   function changeStatus(task: TaskDto, status: TaskStatus): void {
-    void task;
-    void status;
+    if (status === task.status) {
+      return;
+    }
+
+    void taskService
+      .updateStatus(task.id, status)
+      .then(() => load())
+      .catch(() => setError("Failed to update the task."));
   }
 
   return (
@@ -78,7 +84,22 @@ export function TaskList() {
               </div>
               <p className="task__desc">{task.description}</p>
               <time className="task__date">{task.createdAt}</time>
-              {/* TODO: add a control here to change the task's status (call changeStatus). */}
+              <label className="task__actions">
+                Change status
+                <select
+                  aria-label={`Change status for ${task.title}`}
+                  value={task.status}
+                  onChange={(event) =>
+                    changeStatus(task, event.target.value as TaskStatus)
+                  }
+                >
+                  {statuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </li>
           ))}
         </ul>

@@ -1,7 +1,7 @@
 # React frontend
 
 React version of the task-list assessment. It mirrors the Angular application in
-`apps/frontend`, including the intentionally unfinished status-change feature.
+`apps/frontend`.
 
 ## Run
 
@@ -16,13 +16,10 @@ npm run dev
 The React frontend is served at <http://localhost:4300> and proxies `/api` to the
 NestJS backend at <http://localhost:3000>.
 
-## Candidate task
+## Status-change solution
 
-Complete the two `TODO` comments in `src/tasks/TaskList.tsx`:
-
-- Add a control that lets the user choose a new status for each task.
-- Implement `changeStatus(task, status)` with `taskService.updateStatus`, then
-  refresh the list.
+The task list includes a per-task status selector. A successful update refreshes
+the active list, while API failures display an error message.
 
 Run this app's tests with:
 
